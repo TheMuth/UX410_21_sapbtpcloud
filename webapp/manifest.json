@@ -129,5 +129,10 @@
     "sap.cloud": {
         "public": true,
         "service": "student00-sap-training-projectforbtpcloud"
+    },
+    "sap.platform.cf":{
+        "oAuthScopes": [
+            "$XSAPPNAME.SAPBtpCloud"
+        ]
     }
 }
