@@ -1,0 +1,94 @@
+_schema-version: "3.2"
+ID: student00-sap-training-projectforbtpcloud
+description: Cloud App
+version: 0.0.1
+modules:
+- name: student00-sap-training-projectforbtpc-dest-content
+  type: com.sap.application.content
+  requires:
+  - name: student00-sap-training-projectforbtpclou-dest-srv
+    parameters:
+      content-target: true
+  - name: student00-sap-training-projectforbtp-repo-host
+    parameters:
+      service-key:
+        name: student00-sap-training-projectforbtp-repo-host-key
+  - name: student00-sap-training-projectforbtpcloud-uaa
+    parameters:
+      service-key:
+        name: student00-sap-training-projectforbtpcloud-uaa-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: student00-sap-training-projectforbtpclou_repo_host
+          ServiceInstanceName: student00-sap-training-projectforbtpclou-html5-srv
+          ServiceKeyName: student00-sap-training-projectforbtp-repo-host-key
+          sap.cloud.service: student00-sap-training-projectforbtpcloud
+        - Authentication: OAuth2UserTokenExchange
+          Name: student00-sap-training-projectforbtpcloud_uaa
+          ServiceInstanceName: student00-sap-training-projectforbtpclou-xsuaa-srv
+          ServiceKeyName: student00-sap-training-projectforbtpcloud-uaa-key
+          sap.cloud.service: student00-sap-training-projectforbtpcloud
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: student00-sap-training-projectforbtpcl-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: student00-sap-training-projectforbtp-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - student00saptrainingprojectforbtpcloud.zip
+      name: student00saptrainingprojectforbtpcloud
+      target-path: resources/
+- name: student00saptrainingprojectforbtpcloud
+  type: html5
+  path: .
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: student00-sap-training-projectforbtpclou-dest-srv
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: student00-sap-training-projectforbtpclou-dest-srv
+    service-plan: lite
+- name: student00-sap-training-projectforbtpcloud-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: student00-sap-training-projectforbtpclou-xsuaa-srv
+    service-plan: application
+- name: student00-sap-training-projectforbtp-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: student00-sap-training-projectforbtpclou-html5-srv
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
